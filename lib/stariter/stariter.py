@@ -167,59 +167,51 @@ class StarRangeNum(StarRangeBase):
         if self._idx >= self._idx_end:
             raise StopIteration
         self._value = self._idx
-#
-# class StarRangeList(StarRangeBase):
-#
-#     def __init__(self, name, lst):
-#         super(StarRangeList, self).__init__(name=name)
-#         self._lst = lst[:]
-#         self._idx = None
-#
-#     def copy(self):
-#         return StarRangeList(self._name, self._lst)
-#
-#     def __str__(self):
-#         return "StarRangeList<{0!s}:{1!s}>".format(self._name, self._lst)
-#
-#     def i_reset(self):
-#         self._idx = 0
-#         if len(self._lst) == 0:
-#             raise StopIteration
-#         self._value=self._lst[self._idx]
-#
-#     def i_next(self):
-#         self._i = self._i + 1
-#         if self._i >= len(self._lst):
-#             raise StopIteration
-#         return self._lst[self._i]
-#
-# class StarRangeGlob(StarRangeList):
-#
-#     def __init__(self, name, glob_pat):
-#         super(StarRangeList, self).__init__(name=name)
-#         self._glob_pat = glob_pat
-#         self._lst = None
-#         self._idx = None
-#
-#     def copy(self):
-#         return StarRangeGlob(self._name, self._glob_pat)
-#
-#     def __str__(self):
-#         return "StarRangeGlob<{0!s}:{1!s}>".format(self._name, self._glob_pat)
-#
-#     def i_reset(self:
-#         self._lst = glob.glob(self._glob_pat)
-#
-#
-#         #
-#         # print "StarRangeList:i_reset: ",self._name
-#         self._i = 0
-#         if len(self._lst) == 0:
-#             raise StopIteration
-#         return self._lst[self._i]
-#
-#     def i_next(self):
-#         self._i = self._i + 1
-#         if self._i >= len(self._lst):
-#             raise StopIteration
-#         return self._lst[self._i]
+
+
+class StarRangeList(StarRangeBase):
+
+    def __init__(self, name, lst):
+        super(StarRangeList, self).__init__(name=name)
+        self._lst = lst[:]
+        self._idx = None
+
+    def copy(self):
+        return StarRangeList(self._name, self._lst)
+
+    def __str__(self):
+        return "StarRangeList<{0!s}:{1!s}>".format(self._name, self._lst)
+
+    def i_reset(self):
+        self._idx = 0
+        if len(self._lst) == 0:
+            raise StopIteration
+        self._value = self._lst[self._idx]
+
+    def i_next(self):
+        self._idx = self._idx + 1
+        if self._idx >= len(self._lst):
+            raise StopIteration
+        self._value = self._lst[self._idx]
+
+
+class StarRangeGlob(StarRangeList):
+
+    def __init__(self, name, glob_pat):
+        super(StarRangeList, self).__init__(name=name)
+        self._glob_pat = glob_pat
+        self._lst = None
+        self._idx = None
+
+    def copy(self):
+        return StarRangeGlob(self._name, self._glob_pat)
+
+    def __str__(self):
+        return "StarRangeGlob<{0!s}:{1!s}>".format(self._name, self._glob_pat)
+
+    def i_reset(self):
+        self._idx = 0
+        self._lst = glob.glob(self._glob_pat)
+        if len(self._lst) == 0:
+            raise StopIteration()
+        self._value = self._lst[self._idx]
