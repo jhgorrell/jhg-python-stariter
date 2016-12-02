@@ -1,0 +1,127 @@
+#!/usr/bin/env python
+#
+# ~/projects/python/miter/miter-test ---
+#
+# $Id: test-stariter,v 1.5 2011/01/31 20:22:24 harley Exp $
+#
+
+import StarIter
+
+def test_num_0():
+  print "test_num_0 =========="
+  iter=StarIter.StarIter()
+  print iter
+  for i in iter:
+    print "shouldnt print",i
+    raise SystemError
+
+def test_num_1():
+  print "test_num_1 =========="
+  iter=StarIter.StarIter()
+  iter.addRange("a",0,3)
+  print iter
+  for i in iter:
+    print i["a"]
+
+def test_num_2():
+  print "test_num_2 =========="
+  iter=StarIter.StarIter()
+  iter.addRange("a",0,3)
+  iter.addRange("b",10,12)
+  print iter
+  for i in iter:
+    print i["a"],i["b"]
+
+def test_list_0():
+  print "test_list_0 =========="
+  iter=StarIter.StarIter()
+  iter.addList("l0",[])
+  print iter
+  for i in iter:
+    print i["l0"]
+
+def test_list_1():
+  print "test_list_1 =========="
+  iter=StarIter.StarIter()
+  iter.addList("l0",["a","b"])
+  print iter
+  for i in iter:
+    print i["l0"]
+
+def test_list_2():
+  print "test_list_1 =========="
+  iter=StarIter.StarIter()
+  iter.addList("l0",["a","b"])
+  iter.addList("l1",[])
+  print iter
+  for i in iter:
+    print "shouldnt print",i
+    raise SystemError
+
+def test_list_3():
+  print "test_list_3 =========="
+  iter=StarIter.StarIter()
+  iter.addList("l0",[1,2,3,4,5,6])
+  print iter
+  for i in iter.randomOrder():
+    print i["l0"]
+
+def test_list_3():
+  print "test_list_3 =========="
+  iter=StarIter.StarIter()
+  iter.addList("l0",["a","b","c","d"])
+  iter.addList("l1",["1","2","3","4"])
+  print iter
+  for i in iter.randomOrder():
+    print i["l0"]+i["l1"],
+  print
+
+def test_list_4():
+  print "test_list_4 =========="
+  iter=StarIter.StarIter()
+  iter.addList("l0",["a","b","c","d"])
+  iter.addList("l1",["1","2","3","4"])
+  print iter
+  for i in iter.shuffledOrder():
+    print i["l0"]+i["l1"],
+  print
+
+def test_glob_1():
+  print "test_glob_1 =========="
+  iter=StarIter.StarIter()
+  iter.addGlob("file","*")
+  print iter
+  for i in iter:
+    print i["file"]
+
+def test_glob_2():
+  print "test_glob_1 =========="
+  iter=StarIter.StarIter()
+  iter.addGlob("file-a","Star*.py")
+  iter.addGlob("file-b","Star*.py")
+  print iter
+  for i in iter:
+    print "file-a=",i["file-a"],"file-b",i["file-b"]
+
+##########
+
+#
+if False:
+  test_num_0()
+  test_num_1()
+  test_num_2()
+#
+if False:
+  test_list_0()
+  test_list_1()
+  test_list_2()
+  test_list_3()
+  test_list_4()
+#
+if True:
+  test_glob_1()
+  test_glob_2()
+
+# Local Variables:
+# mode: python
+# End:
