@@ -1,174 +1,225 @@
-#!/usr/bin/env python
 #
-# ~/projects/python/miter/miter-test ---
-#
-# $Id: StarIter.py,v 1.7 2011/01/31 20:31:21 harley Exp $
+# jhg-python-stariter/lib/stariter/stariter.py ---
 #
 
+import pdb
 import glob
 import random
 
-class StarIter(object):
-  def __init__(self):
-    # the name is the key.
-    self.ranges=dict()
-  #
-  def __iter__(self):
-    # make a copy of this object and ranges and give it to the iterator,
-    # as iterator modifies the internal state.
-    return StarIterIter(self)
-  # Make a duplicate of ourselves and the Ranges contained.
-  def copy(self):
-    dup=StarIter()
-    for r in self.ranges.itervalues():
-      r_dup=r.copy()
-      dup.ranges[r_dup.name]=r_dup
-    return dup
-  #
-  def __str__(self):
-    s=["StarIter<"]
-    if len(self.ranges)>0:
-      for r in self.ranges.itervalues():
-        s.append("{0!s}".format(r))
-        s.append("; ")
-      s.pop()
-    s.append(">")
-    return "".join(s)
+#####
 
-  #
-  def pushRangeObj(self,range):
-    self.ranges[range.name]=range
-    return self
-  #
-  def addRange(self,name,start,end):
-    return self.pushRangeObj(StarRangeNum(name,start,end))
-  def addList(self,name,list):
-    return self.pushRangeObj(StarRangeList(name,list))
-  def addGlob(self,name,glob):
-    return self.pushRangeObj(StarRangeGlob(name,glob))
-  #
-  def randomOrder(self):
-    return StarIterIter(self,randomOrder=True)
-  #
-  def shuffledOrder(self):
-    lst=[]
-    for i in StarIterIter(self):
-      lst.append(i.copy())
-    random.shuffle(lst)
-    return lst
+
+class StarIter(object):
+
+    def __init__(self):
+        self._range_lst = []
+        self._range_by_name = dict()
+
+    def __str__(self):
+        s = ["StarIter<"]
+        if len(self._range_lst) > 0:
+            for r in self._range_lst:
+                s.append("{0!s}".format(r))
+                s.append("; ")
+            s.pop()
+        s.append(">")
+        return "".join(s)
+
+    def __iter__(self):
+        # make a copy of this object and ranges and give it to the iterator,
+        # as iterator modifies the internal state.
+        return StarIterIter(self)
+    # Make a duplicate of ourselves and the Ranges contained.
+
+    def copy(self):
+        dup = StarIter()
+        for r in self._range_lst:
+            dup.appendRangeObj(r.copy())
+        return dup
+
+    def appendRangeObj(self, range_obj):
+        self._range_lst.append(range_obj)
+        self._range_by_name[range_obj.name] = range_obj
+        return self
+
+    def addRange(self, name, *args, **kwargs):
+        # pdb.set_trace()
+        if len(args) == 1 and type(args[0]) == int:
+            return self.appendRangeObj(StarRangeNum(name, 0, args[0]))
+        if len(args) == 2 and type(args[0]) == int and type(args[1]) == int:
+            return self.appendRangeObj(StarRangeNum(name, args[0], args[1]))
+        #
+        if len(args) == 1 and type(args[0]) == list:
+            return self.appendRangeObj(StarRangeList(name, args[0]))
+        #
+        raise ValueError("")
+
+    def addList(self, name, lst):
+        return self.appendRangeObj(StarRangeList(name, lst))
+
+    def addGlob(self, name, glob_pat):
+        return self.appendRangeObj(StarRangeGlob(name, glob_pat))
+
 
 ##########
+
 
 class StarIterIter(object):
-  def __init__(self,parent,randomOrder=False):
-    # make a copy as we modifiy its internal state.
-    self.parent=parent.copy()
-    self.iterdict=dict()
-    self.r_idx=-1
-    self.r_lst=parent.ranges.values()
-    self.randomOrder=randomOrder
 
-  def __iter__(self):
-    return self
+    def __init__(self, parent):
+        # make a copy as we modifiy its internal state.
+        self._parent = parent.copy()
+        self._state = None
 
-  def next(self):
-    if self.r_idx==-1:
-      if len(self.r_lst)==0:
-        #print "StarIterIter:next(): len(self.r_lst)==0"
+    def __iter__(self):
+        return self
+
+    def setValue(self, name, value):
+        setattr(self, name, value)
+
+    def i_reset(self):
+        self._state = "ok"
+        for r in self._parent._range_lst:
+            try:
+                r.i_reset()
+            except StopIteration:
+                raise StopIteration
+            self.setValue(r.name, r.value)
+        return self
+
+    def next(self):
+        if not self._parent._range_lst:
+            raise StopIteration("Nothing to iterate on.")
+        #
+        if self._state is None:
+            return self.i_reset()
+        #
+        for r in self._parent._range_lst:
+            try:
+                r.i_next()
+                self.setValue(r.name, r.value)
+                return self
+            except StopIteration:
+                r.i_reset()
+                self.setValue(r.name, r.value)
+        #
         raise StopIteration
-      for r in self.r_lst:
-        try:
-          self.iterdict[r.name]=r.i_reset(self.randomOrder)
-        except StopIteration:
-          raise StopIteration
-      self.r_idx=0
-      return self.iterdict
-    #
-    for r in self.r_lst:
-      try:
-        self.iterdict[r.name]=r.i_next()
-        return self.iterdict
-      except StopIteration:
-        self.iterdict[r.name]=r.i_reset(self.randomOrder)
-    raise StopIteration
 
 ##########
 
-class StarRangeNum(object):
-  def __init__(self,name,start,end):
-    self.name=name
-    self.start=start
-    self.end=end
-    self.i=None
-  #
-  def copy(self):
-    return StarRangeNum(self.name,self.start,self.end)
-  def __str__(self):
-    return "StarRangeNum<{0!s}:{1!s}..{2!s}>".format(self.name,self.start,self.end)
-  #
-  def i_reset(self,randomOrder=False):
-    self.i=self.start
-    return self.i
-  def i_next(self):
-    self.i=self.i+1
-    if self.i>=self.end:
-      raise StopIteration
-    return self.i
 
-class StarRangeList(object):
-  def __init__(self,name,lst):
-    self.name=name
-    self.lst=lst[:]
-    self.i=None
-  #
-  def copy(self):
-    return StarRangeList(self.name,self.lst)
-  def __str__(self):
-    return "StarRangeList<{0!s}:{1!s}>".format(self.name,self.lst)
-  #
-  def i_reset(self,randomOrder=False):
-    if randomOrder:
-      random.shuffle(self.lst)
-    #print "StarRangeList:i_reset: ",self.name
-    self.i=0
-    if len(self.lst)==0:
-      raise StopIteration
-    return self.lst[self.i]
-  def i_next(self):
-    self.i=self.i+1
-    if self.i>=len(self.lst):
-      raise StopIteration
-    return self.lst[self.i]
+class StarRangeBase(object):
 
-class StarRangeGlob(object):
-  def __init__(self,name,glob):
-    self.name=name
-    self.glob=glob
-    self.lst=None
-    self.i=None
-  #
-  def copy(self):
-    return StarRangeGlob(self.name,self.glob)
-  def __str__(self):
-    return "StarRangeGlob<{0!s}:{1!s}>".format(self.name,self.glob)
-  #
-  def i_reset(self,randomOrder=False):
-    # reexpand the glob each time iteration starts.
-    self.lst=glob.glob(self.glob)
-    #
-    if randomOrder:
-      random.shuffle(self.lst)
-    #print "StarRangeList:i_reset: ",self.name
-    self.i=0
-    if len(self.lst)==0:
-      raise StopIteration
-    return self.lst[self.i]
-  def i_next(self):
-    self.i=self.i+1
-    if self.i>=len(self.lst):
-      raise StopIteration
-    return self.lst[self.i]
+    def __init__(self, name):
+        self._name = name
+        self._value = None
 
-# Local Variables:
-# mode: python
-# End:
+    def __iter__(self):
+        self.i_reset()
+        return self
+
+    def next(self):
+        return self.i_next()
+
+    def i_reset(self):
+        self._idx = None
+        self._value = None
+        return self
+
+    def i_next(self):
+        raise StopIteration("%s" % (self.__class__.__name__))
+
+    @property
+    def name(self):
+        return self._name
+
+    @property
+    def value(self):
+        return self._value
+
+    def __str__(self):
+        return "<%s %r>" % (self.__class__.__name__, self._name)
+
+
+class StarRangeNum(StarRangeBase):
+
+    def __init__(self, name, start, end):
+        super(StarRangeNum, self).__init__(name=name)
+        self._idx_start = start
+        self._idx_end = end
+
+    def copy(self):
+        return StarRangeNum(self._name, self._idx_start, self._idx_end)
+
+    def __str__(self):
+        return "StarRangeNum<{0!s}:{1!s}..{2!s}>".format(self._name, self._idx_start, self._idx_end)
+
+    def i_reset(self):
+        self._idx = self._idx_start
+        self._value = self._idx
+
+    def i_next(self):
+        if self._idx is None:
+            self._idx = self._idx_start
+        else:
+            self._idx += 1
+        #
+        if self._idx >= self._idx_end:
+            raise StopIteration
+        self._value = self._idx
+#
+# class StarRangeList(StarRangeBase):
+#
+#     def __init__(self, name, lst):
+#         super(StarRangeList, self).__init__(name=name)
+#         self._lst = lst[:]
+#         self._idx = None
+#
+#     def copy(self):
+#         return StarRangeList(self._name, self._lst)
+#
+#     def __str__(self):
+#         return "StarRangeList<{0!s}:{1!s}>".format(self._name, self._lst)
+#
+#     def i_reset(self):
+#         self._idx = 0
+#         if len(self._lst) == 0:
+#             raise StopIteration
+#         self._value=self._lst[self._idx]
+#
+#     def i_next(self):
+#         self._i = self._i + 1
+#         if self._i >= len(self._lst):
+#             raise StopIteration
+#         return self._lst[self._i]
+#
+# class StarRangeGlob(StarRangeList):
+#
+#     def __init__(self, name, glob_pat):
+#         super(StarRangeList, self).__init__(name=name)
+#         self._glob_pat = glob_pat
+#         self._lst = None
+#         self._idx = None
+#
+#     def copy(self):
+#         return StarRangeGlob(self._name, self._glob_pat)
+#
+#     def __str__(self):
+#         return "StarRangeGlob<{0!s}:{1!s}>".format(self._name, self._glob_pat)
+#
+#     def i_reset(self:
+#         self._lst = glob.glob(self._glob_pat)
+#
+#
+#         #
+#         # print "StarRangeList:i_reset: ",self._name
+#         self._i = 0
+#         if len(self._lst) == 0:
+#             raise StopIteration
+#         return self._lst[self._i]
+#
+#     def i_next(self):
+#         self._i = self._i + 1
+#         if self._i >= len(self._lst):
+#             raise StopIteration
+#         return self._lst[self._i]

@@ -3,4 +3,3 @@
 #
 
 from stariter import StarIter
-
