@@ -4,7 +4,9 @@
 
 _default: _test
 
-SHELL=bash
+export SHELL=bash
+#export PYTHONWARNINGS="Unverified HTTPS request"
+#export PYTHONWARNINGS="ignore:Unverified HTTPS request"
 
 ###
 
@@ -38,9 +40,14 @@ _test: ve _test_unittests
 _test_pip_install:
 	rm -rf ve-test-pip-install build
 	virtualenv ve-test-pip-install
-#	./ve-test-pip-install/bin/pip install -e git+https://github.com/jhgorrell/jhg-python-stariter#egg=jhg-python-stariter
-	./ve-test-pip-install/bin/pip install .
-	./ve-test-pip-install/bin/python -c "import stariter"
+	./ve-test-pip-install/bin/pip install --upgrade pip
+# using '-e' results in a bad install.
+# the path 
+#	-./ve-test-pip-install/bin/pip install git+https://github.com/jhgorrell/jhg-python-stariter#egg=jhg-python-stariter
+# works
+#	-./ve-test-pip-install/bin/pip install .
+	-./ve-test-pip-install/bin/pip install -e .
+	-./ve-test-pip-install/bin/python -c "import stariter"
 #
-	find . -name star\*
-	cat ./ve-test-pip-install/lib/python2.7/site-packages/jhg-python-stariter.egg-link
+	-find . -name star\*
+	-cat ./ve-test-pip-install/lib/python2.7/site-packages/jhg-python-stariter.egg-link
