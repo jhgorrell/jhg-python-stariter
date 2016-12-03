@@ -1,8 +1,27 @@
+#
+# ~/jhg-python-stariter/circle.yml ---
+#
+# https://circleci.com/docs/configuration
+
+checkout:
+  post:
+    - git submodule sync
+    - git submodule update --init
+
 general:
   artifacts:
-    - make-test.stderr
+    - make-test-output.txt
+
 test:
   override:
-    - make _test >& make-test.stderr
+    - make _test |& tee make-test-output.txt
 
+# Get errors like: "fatal: No such section!"?
+# Add some sections to see if that can be fixed.
 
+machine:
+  environment:
+    foo: bar
+    baz: 123
+  services:
+    - postgres
