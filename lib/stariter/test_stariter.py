@@ -62,7 +62,6 @@ class TestStarIter(unittest.TestCase):
         self.assertTrue(cnt == 2)
 
     def test_list_3(self):
-        print "test_list_3 =========="
         siter = StarIter()
         siter.addList("l0", ["a", "b", "c", "d"])
         siter.addList("l1", ["1", "2", "3", "4"])
@@ -75,7 +74,6 @@ class TestStarIter(unittest.TestCase):
         self.assertTrue(cnt == 16)
 
     def test_glob_1(self):
-        print "test_glob_1 =========="
         siter = StarIter()
         siter.addGlob("path", "lib/stariter/*.py")
         print siter
@@ -83,7 +81,6 @@ class TestStarIter(unittest.TestCase):
             print i.path
 
     def test_glob_2(self):
-        print "test_glob_1 =========="
         siter = StarIter()
         siter.addGlob("path_a", "lib/stariter/*.py")
         siter.addGlob("path_b", "lib/stariter/*.py")

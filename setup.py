@@ -15,6 +15,9 @@ setuptools.setup(
     author_email='harley@panix.com',
     install_requires=[],
     license='MIT',
-    packages=['lib/stariter'],
+    package_dir={
+        'stariter':'lib/stariter',
+    },
+    packages=['stariter'],
     url='https://github.com/jhgorrell/jhg-python-stariter',
 )
