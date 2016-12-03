@@ -50,4 +50,4 @@ _test_pip_install:
 	-./ve-test-pip-install/bin/python -c "import stariter"
 #
 	-find . -name star\*
-	-cat ./ve-test-pip-install/lib/python2.7/site-packages/jhg-python-stariter.egg-link
+#	-cat ./ve-test-pip-install/lib/python2.7/site-packages/jhg-python-stariter.egg-link
