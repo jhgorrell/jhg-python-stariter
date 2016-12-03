@@ -25,10 +25,10 @@ _printenv:
 autopep_files:=setup.py lib/stariter/*.py
 
 _autopep8:
-	autopep8 -i ${autopep_files}
+	./ve/bin/autopep8 -i ${autopep_files}
 
 _autopep8_check:
-	autopep8 --diff ${autopep_files} 2>&1 | tee autopep8.diff
+	./ve/bin/autopep8 --diff ${autopep_files} 2>&1 | tee autopep8.diff
 
 ###
 
