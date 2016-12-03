@@ -16,10 +16,19 @@ _ve:
 
 ve:
 	make _ve
+
+_printenv:
+	printenv | sort
+
 ###
 
+autopep_files:=setup.py lib/stariter/*.py
+
 _autopep8:
-	autopep8 -i setup.py lib/stariter/*.py
+	autopep8 -i ${autopep_files}
+
+_autopep8_check:
+	autopep8 --diff ${autopep_files} 2>&1 | tee autopep8.diff
 
 ###
 
@@ -36,7 +45,6 @@ _test_unittests:
 
 _test: ve _test_unittests
 
-
 _test_pip_install:
 	rm -rf ve-test-pip-install build
 	virtualenv ve-test-pip-install
@@ -52,3 +60,7 @@ _test_pip_install:
 #
 	-find . -name star\*
 #	-cat ./ve-test-pip-install/lib/python2.7/site-packages/jhg-python-stariter.egg-link
+
+###
+
+_circleci: _printenv _test _autopep8_check

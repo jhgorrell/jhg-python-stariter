@@ -10,11 +10,12 @@ checkout:
 
 general:
   artifacts:
+    - autopep8.diff
     - make-test-output.txt
 
 test:
   override:
-    - make _test |& tee make-test-output.txt
+    - make _circleci 2>&1 | tee make-test-output.txt
 
 # Get errors like: "fatal: No such section!"?
 # Add some sections to see if that can be fixed.
