@@ -19,9 +19,9 @@ test:
 # Get errors like: "fatal: No such section!"?
 # Add some sections to see if that can be fixed.
 
-machine:
-  environment:
-    foo: bar
-    baz: 123
-  services:
-    - postgres
+# machine:
+#   environment:
+#     foo: bar
+#     baz: 123
+#   services:
+#     - postgres
