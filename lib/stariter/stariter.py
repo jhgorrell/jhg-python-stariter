@@ -2,6 +2,9 @@
 # jhg-python-stariter/lib/stariter/stariter.py ---
 #
 
+from __future__ import division
+from __future__ import print_function
+
 import pdb
 import glob
 import random
