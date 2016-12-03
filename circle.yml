@@ -1,0 +1,8 @@
+general:
+  artifacts:
+    - make-test.stderr
+test:
+  override:
+    - make _test >& make-test.stderr
+
+

@@ -1,4 +1,5 @@
 *.bin
+*.clippings
 *.dmg
 *.egg-info/**
 *.elc
@@ -18,6 +19,7 @@ OLD/**
 \#*\#
 build/**
 dist/**
-out
+lib/jhg_python_stariter.egg-info/**
 passwds
+ve-test-pip-install/**
 ve/**

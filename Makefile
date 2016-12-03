@@ -40,13 +40,14 @@ _test: ve _test_unittests
 _test_pip_install:
 	rm -rf ve-test-pip-install build
 	virtualenv ve-test-pip-install
-	./ve-test-pip-install/bin/pip install --upgrade pip
+#	./ve-test-pip-install/bin/pip install --upgrade pip
 # using '-e' results in a bad install.
-# the path 
-#	-./ve-test-pip-install/bin/pip install git+https://github.com/jhgorrell/jhg-python-stariter#egg=jhg-python-stariter
+# the path
+	./ve-test-pip-install/bin/pip install git+https://github.com/jhgorrell/jhg-python-stariter#egg=jhg-python-stariter
+#	./ve-test-pip-install/bin/pip install -e git+https://github.com/jhgorrell/jhg-python-stariter#egg=jhg-python-stariter
 # works
 #	-./ve-test-pip-install/bin/pip install .
-	-./ve-test-pip-install/bin/pip install -e .
+#	-./ve-test-pip-install/bin/pip install -e .
 	-./ve-test-pip-install/bin/python -c "import stariter"
 #
 	-find . -name star\*
