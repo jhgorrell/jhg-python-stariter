@@ -17,7 +17,15 @@ ve:
 ###
 
 _autopep8:
-	autopep8 -i lib/stariter/*.py
+	autopep8 -i setup.py lib/stariter/*.py
+
+###
+
+_pip_install_local:
+	pip install -e .
+
+_pip_install_github:
+	pip install -e git+https://github.com/jhgorrell/jhg-python-stariter#egg=jhg-python-stariter
 
 ###
 

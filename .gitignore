@@ -1,5 +1,6 @@
 *.bin
 *.dmg
+*.egg-info/**
 *.elc
 *.exe
 *.html
@@ -15,6 +16,8 @@
 .DS_Store
 OLD/**
 \#*\#
+build/**
+dist/**
 out
 passwds
 ve/**

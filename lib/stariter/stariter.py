@@ -29,7 +29,6 @@ class StarIter(object):
         # make a copy of this object and ranges and give it to the iterator,
         # as iterator modifies the internal state.
         return StarIterIter(self)
-    # Make a duplicate of ourselves and the Ranges contained.
 
     def copy(self):
         dup = StarIter()
@@ -77,6 +76,13 @@ class StarIterIter(object):
     def setValue(self, name, value):
         setattr(self, name, value)
 
+    def reset(self):
+        try:
+            self.i_reset()
+        except StopIteration as e:
+            pass
+        return self
+
     def i_reset(self):
         self._state = "ok"
         for r in self._parent._range_lst:
@@ -105,6 +111,12 @@ class StarIterIter(object):
         #
         raise StopIteration
 
+    def values(self):
+        d = dict()
+        for r in self._parent._range_lst:
+            d[r.name] = r.value
+        return d
+
 ##########
 
 
@@ -117,6 +129,9 @@ class StarRangeBase(object):
     def __iter__(self):
         self.i_reset()
         return self
+
+    def __str__(self):
+        return "<%s %r>" % (self.__class__.__name__, self._name)
 
     def next(self):
         return self.i_next()
@@ -136,9 +151,6 @@ class StarRangeBase(object):
     @property
     def value(self):
         return self._value
-
-    def __str__(self):
-        return "<%s %r>" % (self.__class__.__name__, self._name)
 
 
 class StarRangeNum(StarRangeBase):
@@ -211,7 +223,8 @@ class StarRangeGlob(StarRangeList):
 
     def i_reset(self):
         self._idx = 0
-        self._lst = glob.glob(self._glob_pat)
+        if self._lst is None:
+            self._lst = glob.glob(self._glob_pat)
         if len(self._lst) == 0:
             raise StopIteration()
         self._value = self._lst[self._idx]
