@@ -90,3 +90,8 @@ class TestStarIter(unittest.TestCase):
         print(siter)
         for i in siter:
             print("a=%s b=%s" % (i.path_a, i.path_b))
+
+    def test_iter_1(self):
+        for i in StarIter().addRange("a", range(3)).addRange("b", range(3)):
+            print("subiter:", i.values_list())
+        print(i)

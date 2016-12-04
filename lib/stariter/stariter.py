@@ -54,6 +54,9 @@ class StarIter(object):
         if len(args) == 1 and type(args[0]) == list:
             return self.appendRangeObj(StarRangeList(name, args[0]))
         #
+        if len(args) == 1 and callable(getattr(args[0], "__iter__")):
+            return self.appendRangeObj(StarRangeSubiter(name, args[0]))
+        #
         raise ValueError("")
 
     def addList(self, name, lst):
@@ -114,11 +117,14 @@ class StarIterIter(object):
         #
         raise StopIteration
 
-    def values(self):
+    def values_dict(self):
         d = dict()
         for r in self._parent._range_lst:
             d[r.name] = r.value
         return d
+
+    def values_list(self):
+        return [(r.name, r.value) for r in self._parent._range_lst]
 
 ##########
 
@@ -198,9 +204,9 @@ class StarRangeList(StarRangeBase):
         return "StarRangeList<{0!s}:{1!s}>".format(self._name, self._lst)
 
     def i_reset(self):
-        self._idx = 0
         if len(self._lst) == 0:
             raise StopIteration
+        self._idx = 0
         self._value = self._lst[self._idx]
 
     def i_next(self):
@@ -225,9 +231,32 @@ class StarRangeGlob(StarRangeList):
         return "StarRangeGlob<{0!s}:{1!s}>".format(self._name, self._glob_pat)
 
     def i_reset(self):
-        self._idx = 0
         if self._lst is None:
             self._lst = glob.glob(self._glob_pat)
         if len(self._lst) == 0:
             raise StopIteration()
+        self._idx = 0
+        self._value = self._lst[self._idx]
+
+
+class StarRangeSubiter(StarRangeList):
+
+    def __init__(self, name, subiter, lst=None):
+        super(StarRangeList, self).__init__(name=name)
+        self._subiter = subiter
+        self._idx = None
+        self._lst = lst
+
+    def copy(self):
+        return StarRangeSubiter(self.name, self._subiter, self._lst)
+
+    def __str__(self):
+        return "StarRangeSubitr<{0!s}>".format(self._name)
+
+    def i_reset(self):
+        if self._lst is None:
+            self._lst = list(self._subiter)
+        if len(self._lst) == 0:
+            raise StopIteration()
+        self._idx = 0
         self._value = self._lst[self._idx]
